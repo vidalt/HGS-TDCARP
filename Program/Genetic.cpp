@@ -51,7 +51,7 @@ void Genetic::evolveHGA (int maxIterNonProd, int nbRec)
 
 	cout << "| Start of GA | NbNodes : " << params->nbClients << " | NbVehicles : " << params->nbVehiculesPerDep << " | " << endl ;
 
-	while (nbIterNonProd < maxIterNonProd && (clock() - params->startTime <= ticks) && (!params->isSearchingFeasible || population->getIndividuBestValide() == NULL))
+	while (nbIterNonProd < maxIterNonProd && clock() - params->startTime <= ticks)
 	{
 		// CROSSOVER
 		parent1 = population->getIndividuBinT(); // Pick two individuals per binary tournament

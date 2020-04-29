@@ -57,13 +57,6 @@ class Params
 {
 public:
 
-	// Problem type
-	/*
-	type =     // This lists the problems which can be solved with this algorithm
-			   30 CARP (Capacitated Arc Routing Problem)
-			   37 TD-CARP (Capacitated Arc Routing Problem with time-dependent travel times)
-			   */
-	int type ;
 	int seed ;												// random seed
 	string pathToInstance ;									// path to the instance
 	string pathToSolution ;									// path to the solution
@@ -101,10 +94,6 @@ public:
 	// Are we running an Iterated Local Search ?
 	// In this case the behavior of the method is changed at several points
 	bool isILS_general ;
-
-	// Are we running a feasibility problem ?
-	// In this case we would stop the search as soon as a feasible solution is found
-	bool isSearchingFeasible ;
 
 	// population size parameters
 	int mu ; // Default 25
@@ -146,8 +135,6 @@ public:
 	// setting the parameters of the method
 	void setMethodParams () ;
 	void preleveDonnees (string nomInstance) ;
-	void ar_parseOtherLinesCARP() ;
-	void ar_computeDistancesNodesAndProximityServicesCARP() ;
 	void ar_parseOtherLinesTDCARP() ;
 	void ar_computeProximityServicesTDCARP() ;
 
@@ -158,7 +145,7 @@ public:
 	void shuffleProches () ;
 
 	// constructor
-	Params(string nomInstance, string nomSolution, string nomBKS, int seedRNG, int type, int nbVeh, int nbDep, bool isSearchingFeasible);
+	Params(string nomInstance, string nomSolution, string nomBKS, int seedRNG);
 };
 #endif
 

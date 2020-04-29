@@ -48,78 +48,39 @@ void Params::preleveDonnees (string nomInstance)
 	int depotIndex;
 	double startTime;
 
-	if (type == 30) // This is a standard CARP (can also be an experiment for MDCARP, when the number of depots is defined to be greater than 1)
-	{
-		// Reading all lines one by one
-		getline(fichier, contenu); 
-		getline(fichier, contenu);
-		fichier >> useless2 ;
-		fichier >> useless2 ;
-		fichier >> ar_NodesNonRequired ;
-		fichier >> useless2 ;
-		fichier >> useless2 ;
-		fichier >> ar_EdgesRequired ;
-		fichier >> useless2 ;
-		fichier >> useless2 ;
-		fichier >> ar_EdgesNonRequired ;
-		fichier >> useless2 ;
-		fichier >> useless2 ;
-		fichier >> nbVehiculesPerDep ;
+	// Reading all lines one by one
+	getline(fichier, contenu);
+	fichier >> useless2;
+	fichier >> useless2;
+	fichier >> ar_NodesNonRequired;
+	ar_NodesNonRequired--; // The depot is not counted in the required nodes
+	fichier >> useless2;
+	fichier >> useless2;
+	fichier >> ar_EdgesRequired;
+	fichier >> useless2;
+	fichier >> useless2;
+	fichier >> nbVehiculesPerDep;
+	fichier >> useless2;
+	fichier >> useless2;
+	fichier >> vc;
+	fichier >> useless2;
+	fichier >> useless2;
+	fichier >> depotIndex;
+	fichier >> useless2;
+	fichier >> useless2;
+	fichier >> startTime;
+	if (startTime != 0) throw string("ERROR: Start time should always be 0.0");
+	fichier >> useless2;
+	fichier >> useless2;
+	fichier >> endHorizon;
+	getline(fichier, contenu);
+	getline(fichier, contenu);
 
-		// The instance only provides a lower bound on the necessary number of vehicles, per definition of the CARP, more vehicles are allowed (here we put one more)
-		// Still, in all solutions the minimum number of vehicles turned out to be used
-		nbVehiculesPerDep ++ ; 
-		fichier >> useless2 ;
-		fichier >> useless2 ;
-		fichier >> vc ;
-		getline(fichier, contenu);
-		getline(fichier, contenu);		
-		getline(fichier, contenu);
-		getline(fichier, contenu);
-
-		ar_NodesRequired = 0 ;
-		ar_ArcsRequired = 0 ;
-		ar_ArcsNonRequired = 0 ;
-		ar_distanceNodes = vector < vector < double > >(1 + ar_NodesNonRequired + ar_NodesRequired, vector < double >(1 + ar_NodesNonRequired + ar_NodesRequired, 1.e20));
-	}
-	else if (type == 37) // This is the TD-CARP
-	{
-		// Reading all lines one by one
-		getline(fichier, contenu);
-		fichier >> useless2;
-		fichier >> useless2;
-		fichier >> ar_NodesNonRequired;
-		ar_NodesNonRequired--; // The depot is not counted in the required nodes
-		fichier >> useless2;
-		fichier >> useless2;
-		fichier >> ar_EdgesRequired;
-		fichier >> useless2;
-		fichier >> useless2;
-		fichier >> nbVehiculesPerDep;
-		fichier >> useless2;
-		fichier >> useless2;
-		fichier >> vc;
-		fichier >> useless2;
-		fichier >> useless2;
-		fichier >> depotIndex;
-		fichier >> useless2;
-		fichier >> useless2;
-		fichier >> startTime;
-		if (startTime != 0) throw string("ERROR: Start time should always be 0.0");
-		fichier >> useless2;
-		fichier >> useless2;
-		fichier >> endHorizon;
-		getline(fichier, contenu);
-		getline(fichier, contenu);
-
-		ar_NodesRequired = 0;
-		ar_EdgesNonRequired = 0;
-		ar_ArcsRequired = 0;
-		ar_ArcsNonRequired = 0;
-		ar_TDSP = vector < vector < PLFunction > >(1 + ar_NodesNonRequired, vector < PLFunction >(1 + ar_NodesNonRequired, PLFunction(endHorizon, nbBuckets)));
-	}
-	else
-		throw string ("Incorrect problem type");
+	ar_NodesRequired = 0;
+	ar_EdgesNonRequired = 0;
+	ar_ArcsRequired = 0;
+	ar_ArcsNonRequired = 0;
+	ar_TDSP = vector < vector < PLFunction > >(1 + ar_NodesNonRequired, vector < PLFunction >(1 + ar_NodesNonRequired, PLFunction(endHorizon, nbBuckets)));
 
 	nbDays = 1 ; 
 	ancienNbDays = 1 ;
@@ -156,84 +117,50 @@ void Params::preleveDonnees (string nomInstance)
 		cli[i].ar_nodesExtr0 = -1;
 		cli[i].ar_nodesExtr1 = -1;
 
-		if (type == 30) // CARP instances
+		cli[i].ar_TDserviceDuration01 = PLFunction(endHorizon, nbBuckets);
+		cli[i].ar_TDserviceDuration10 = PLFunction(endHorizon, nbBuckets);
+
+		if (i < nbDepots)
 		{
-			if (i < nbDepots)
+			cli[i].ar_nodesExtr0 = depotIndex;
+			cli[i].ar_nodesExtr1 = depotIndex;
+			cli[i].ar_nodeType = AR_DEPOT;
+			cli[i].freq = 0;
+			cli[i].demand = 0;
+			cli[i].ar_TDserviceDuration01.addPiece(endHorizon, endHorizon, 1.0);
+			cli[i].ar_TDserviceDuration10.addPiece(endHorizon, endHorizon, 1.0);
+		}
+		else
+		{
+			cli[i].ar_nodeType = AR_CLIENT_EDGE;
+			fichier >> cli[i].ar_nodesExtr0;
+			fichier >> cli[i].ar_nodesExtr1;
+			fichier >> cli[i].ar_TDdistance;
+			fichier >> cli[i].demand;
+			fichier >> nbPieces;
+			for (int k = 0; k < nbPieces; k++)
 			{
-				cli[i].ar_serviceCost01 = 0.;
-				cli[i].ar_serviceCost10 = 0.;
-				cli[i].freq = 0;
-				cli[i].demand = 0;
-				cli[i].ar_nodeType = AR_DEPOT;
+				fichier >> myX;
+				fichier >> myY;
+				fichier >> mySlope;
+				cli[i].ar_TDserviceDuration01.addPiece(myX, myY, mySlope);
 			}
-			else
+			getline(fichier, contenu);
+			fichier >> tempstring;
+			fichier >> tempstring;
+			fichier >> tempstring;
+			fichier >> tempstring;
+			fichier >> nbPieces;
+			for (int k = 0; k < nbPieces; k++)
 			{
-				fichier >> tempstring;
-				fichier >> cli[i].ar_nodesExtr0;
-				fichier >> tempstring;
-				fichier >> cli[i].ar_nodesExtr1;
-				fichier >> tempstring;
-				fichier >> tempstring;
-				fichier >> cli[i].ar_serviceCost01;
-				cli[i].ar_serviceCost10 = cli[i].ar_serviceCost01;
-
-				// setting the distance between the nodes (here its symmetric)
-				ar_distanceNodes[cli[i].ar_nodesExtr0][cli[i].ar_nodesExtr1] = cli[i].ar_serviceCost01;
-				ar_distanceNodes[cli[i].ar_nodesExtr1][cli[i].ar_nodesExtr0] = cli[i].ar_serviceCost01;
-
-				fichier >> tempstring;
-				fichier >> cli[i].demand;
-				cli[i].ar_nodeType = AR_CLIENT_EDGE;
+				fichier >> myX;
+				fichier >> myY;
+				fichier >> mySlope;
+				cli[i].ar_TDserviceDuration10.addPiece(myX, myY, mySlope);
 			}
 		}
-		else if (type == 37) // TD-CARP instances
-		{
-			cli[i].ar_TDserviceDuration01 = PLFunction(endHorizon, nbBuckets);
-			cli[i].ar_TDserviceDuration10 = PLFunction(endHorizon, nbBuckets);
-
-			if (i < nbDepots)
-			{
-				cli[i].ar_nodesExtr0 = depotIndex;
-				cli[i].ar_nodesExtr1 = depotIndex;
-				cli[i].ar_nodeType = AR_DEPOT;
-				cli[i].freq = 0;
-				cli[i].demand = 0;
-				cli[i].ar_TDserviceDuration01.addPiece(endHorizon, endHorizon, 1.0);
-				cli[i].ar_TDserviceDuration10.addPiece(endHorizon, endHorizon, 1.0);
-			}
-			else
-			{
-				cli[i].ar_nodeType = AR_CLIENT_EDGE;
-				fichier >> cli[i].ar_nodesExtr0;
-				fichier >> cli[i].ar_nodesExtr1;
-				fichier >> cli[i].ar_TDdistance;
-				fichier >> cli[i].demand;
-				fichier >> nbPieces;
-				for (int k = 0; k < nbPieces; k++)
-				{
-					fichier >> myX;
-					fichier >> myY;
-					fichier >> mySlope;
-					cli[i].ar_TDserviceDuration01.addPiece(myX, myY, mySlope);
-				}
-				getline(fichier, contenu);
-				fichier >> tempstring;
-				fichier >> tempstring;
-				fichier >> tempstring;
-				fichier >> tempstring;
-				fichier >> nbPieces;
-				for (int k = 0; k < nbPieces; k++)
-				{
-					fichier >> myX;
-					fichier >> myY;
-					fichier >> mySlope;
-					cli[i].ar_TDserviceDuration10.addPiece(myX, myY, mySlope);
-				}
-			}
-			cli[i].ar_TDserviceDuration01.finalizeStructure();
-			cli[i].ar_TDserviceDuration10.finalizeStructure();
-		}
-		else throw string("Non recognized problem type");
+		cli[i].ar_TDserviceDuration01.finalizeStructure();
+		cli[i].ar_TDserviceDuration10.finalizeStructure();
 
 		p.dep = 0;
 		p.cost = 0;
@@ -241,18 +168,8 @@ void Params::preleveDonnees (string nomInstance)
 		cli[i].visits.push_back(p);
 	}
 
-	// The file formats for CARP, NEARP and NEARP-TP may require some distinct parsing routines due to different formats
-	if (type == 30)
-	{
-		ar_parseOtherLinesCARP();
-		ar_computeDistancesNodesAndProximityServicesCARP();
-	}
-	else if (type == 37)
-	{
-		ar_parseOtherLinesTDCARP();
-		ar_computeProximityServicesTDCARP();
-	}
-	else throw string("Unrecognized problem type");
+	ar_parseOtherLinesTDCARP();
+	ar_computeProximityServicesTDCARP();
 }
 
 bool compPredicate(pairB i, pairB j) 
@@ -312,7 +229,7 @@ void Params::calculeStructures ()
 	}
 }
 
-Params::Params(string nomInstance, string nomSolution, string nomBKS, int seedRNG, int type, int nbVeh, int nbDep, bool isSearchingFeasible):type(type), nbVehiculesPerDep(nbVeh), nbDepots(nbDep), isSearchingFeasible(isSearchingFeasible)
+Params::Params(string nomInstance, string nomSolution, string nomBKS, int seedRNG)
 {
 	// Main constructor of Params
 	pathToInstance = nomInstance ;
@@ -369,72 +286,6 @@ void Params::shuffleProches ()
 			cli[i].sommetsVoisinsAvant[temp2] = temp ;
 		}
 	}
-}
-
-void Params::ar_computeDistancesNodesAndProximityServicesCARP()
-{
-	for (int ii = 1 ; ii <= ar_NodesNonRequired + ar_NodesRequired ; ii++)
-		ar_distanceNodes[ii][ii] = 0 ;
-
-	// simple application of the Floyd Warshall algorithm
-	for (int k=1 ; k <= ar_NodesNonRequired + ar_NodesRequired ; k++)
-	{
-		for (int i=1 ; i <= ar_NodesNonRequired + ar_NodesRequired ; i++)
-		{
-			for (int j=1 ; j <= ar_NodesNonRequired + ar_NodesRequired ; j++)
-			{
-				if (ar_distanceNodes[i][k] + ar_distanceNodes[k][j] < ar_distanceNodes[i][j])
-					ar_distanceNodes[i][j] = ar_distanceNodes[i][k] + ar_distanceNodes[k][j] ;
-			}
-		}
-	}
-
-	// Proximity information between services for the granular search
-	// The proximity between two services is the minimum distance between the closest endpoints of the edge
-	timeCost = vector < vector < double > >(nbClients + nbDepots + 1, vector < double >(nbClients + nbDepots + 1));
-	for (int i=0 ; i < nbClients + nbDepots ; i++)
-	{
-		for (int j=0 ; j < nbClients + nbDepots ; j++)
-		{
-			timeCost[i][j] = min(min(ar_distanceNodes[cli[i].ar_nodesExtr0][cli[j].ar_nodesExtr0],
-				ar_distanceNodes[cli[i].ar_nodesExtr0][cli[j].ar_nodesExtr1]),
-				min(ar_distanceNodes[cli[i].ar_nodesExtr1][cli[j].ar_nodesExtr0],
-					ar_distanceNodes[cli[i].ar_nodesExtr1][cli[j].ar_nodesExtr1]));
-		}
-	}
-}
-
-void Params::ar_parseOtherLinesCARP()
-{
-	// Parsing routine for CARP
-	string contenu;
-	string useless;
-	int startNode ;
-	int endNode ;
-	double myCost ;
-
-	getline(fichier, contenu);
-	if (ar_EdgesNonRequired  > 0) getline(fichier, contenu);
-
-	for (int k=0 ; k < ar_EdgesNonRequired ; k++)
-	{
-		fichier >> useless ;
-		fichier >> startNode ;
-		fichier >> useless ;
-		fichier >> endNode ;
-		fichier >> useless ;
-		fichier >> useless ;
-		fichier >> myCost ;
-		ar_distanceNodes[startNode][endNode] = myCost ;
-		ar_distanceNodes[endNode][startNode] = myCost ;
-	}
-
-	// at the end we need to set the depot locations 
-	fichier >> useless ;
-	fichier >> useless ;
-	fichier >> startNode ; // in CARP instances, this information is included in the file
-	cli[0].ar_nodesExtr0 = startNode ;
-	cli[0].ar_nodesExtr1 = startNode ;
 }
 
 void Params::ar_computeProximityServicesTDCARP()

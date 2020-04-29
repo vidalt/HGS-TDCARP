@@ -37,15 +37,6 @@ class commandline
 		// seed
 		int seed;
 
-		// instance type, if given (see definitions in Params.h)
-		int type;
-
-		// nbVehicles, if given (for the MM-kWRPP, the fleet size has to be specified)
-		int nbVeh ;
-
-		// nbDepots, if given (used to generate the MDCARP instances)
-		int nbDep ;
-
         // instance path
         string instance_name;
 
@@ -70,9 +61,6 @@ class commandline
         string get_path_to_solution();
         string get_path_to_BKS();
         int get_cpu_time();
-		int get_type();
-		int get_nbVeh();
-		int get_nbDep();
         int get_seed();
 
         // say if the commandline is valid

@@ -31,7 +31,6 @@ public:
 	int lastNode ; // last node of the SeqData
 	double load ; // total demand on the SeqData
 
-#ifndef CARP
 	vector<int> nodes;  // nodes in the SeqData
 	double bestCostAt0; // time dependent completion time for both modes
 	double bestCostAt1; // time dependent completion time for both modes
@@ -39,13 +38,6 @@ public:
 	double bestCostLB10; // lower bound on the time of the sequence, starting from mode 1 and finishing with mode 0
 	double bestCostLB01; // lower bound on the time of the sequence, starting from mode 0 and finishing with mode 1
 	double bestCostLB11; // lower bound on the time of the sequence, starting from mode 1 and finishing with mode 1
-#else
-	double distance;
-	double bestCost00;
-	double bestCost10;
-	double bestCost01;
-	double bestCost11;
-#endif
 
 	// We use this data structure to be able to track the best combination of edge orientations
 	// To report the complete solution (with edge orientations) at the end of the algorithm

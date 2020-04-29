@@ -41,7 +41,7 @@ void commandline::SetDefaultOutput(string to_parse)
 
 commandline::commandline(int argc, char* argv[])
 {
-	if (argc%2 != 0 || argc > 14 || argc < 2)
+	if (argc%2 != 0 || argc > 10 || argc < 2)
 	{
 		cout << "incorrect command line" << endl ;
 		command_ok = false;
@@ -53,9 +53,6 @@ commandline::commandline(int argc, char* argv[])
 	SetDefaultOutput(string(argv[1]));
 	cpu_time = 300; // Five minutes is default CPU time
 	seed = 0;
-	type = -1 ;
-	nbVeh = -1 ;
-	nbDep = -1 ;
 
 	// reading the commandline parameters
 	for ( int i = 2 ; i < argc ; i += 2 )
@@ -68,45 +65,11 @@ commandline::commandline(int argc, char* argv[])
 			BKS_name = string(argv[i+1]);
 		else if ( string(argv[i]) == "-seed" )
 			seed = atoi(argv[i+1]);
-		else if ( string(argv[i]) == "-type" )
-			type = atoi(argv[i+1]);
-		else if ( string(argv[i]) == "-veh" )
-			nbVeh = atoi(argv[i+1]);
-		else if ( string(argv[i]) == "-dep" )
-			nbDep = atoi(argv[i+1]);
 		else
 		{
 			cout << "Non-recognized command : " << string(argv[i]) << endl ;
 			command_ok = false ;
 		}
-	}
-
-	if (type == -1)
-	{
-		cout << "Please specify a problem type : " << endl ;
-		cout << "-type 30 = CARP" << endl ;
-		cout << "-type 31 = MCGRP" << endl ;
-		cout << "-type 32 = PCARP" << endl ;
-		cout << "-type 33 = MDCARP" << endl ;
-		cout << "-type 34 = MCGRP-TP" << endl ;
-		cout << "-type 35 = MM-kWRPP" << endl ;
-		command_ok = false;
-		return ;
-	}
-
-	if (type == 32 && nbVeh == -1)
-	{
-		cout << "For the PCARP, please specify the starting value (an upper bound) for the number of vehicles" << endl ;
-		cout << "Setting -veh 10 should be a reasonable choice for the instances enclosed in the archive" << endl ;
-		command_ok = false;
-		return ;
-	}
-
-	if (type == 33 && nbDep == -1)
-	{
-		cout << "For the MDCARP, please also specify the number of depots" << endl ;
-		command_ok = false;
-		return ;
 	}
 
 	command_ok = true;
@@ -127,21 +90,6 @@ string commandline::get_path_to_solution()
 string commandline::get_path_to_BKS()
 {
 	return BKS_name;
-}
-
-int commandline::get_type()
-{
-	return type;
-}
-
-int commandline::get_nbVeh()
-{
-	return nbVeh ;
-}
-
-int commandline::get_nbDep()
-{
-	return nbDep ;
 }
 
 int commandline::get_cpu_time()

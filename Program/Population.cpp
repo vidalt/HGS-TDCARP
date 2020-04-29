@@ -34,7 +34,7 @@ Population::Population(Params * params) : params(params)
 	trainer->localSearch = new LocalSearch(params,trainer) ; // Initialize the LS structure
 
 	// Creating the initial populations
-	for (int i=0 ; i < params->mu && (!params->isSearchingFeasible || !feasibleFound) ; i++ )
+	for (int i=0 ; i < params->mu ; i++ )
 	{
 		randomIndiv = new Individu (params,true);
 		education(randomIndiv);

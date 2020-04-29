@@ -34,13 +34,13 @@ int main(int argc, char *argv[])
 	commandline c(argc, argv);
 
 	if (!c.is_valid())
-		throw string("Commandline could not be read, Usage : gencarp instance -type problemType [-t cpu-time] [-sol solutionPath]  [-s seed] [-veh nbVehicles] [-dep nbDepots]");
+		throw string("Commandline could not be read, Usage : gencarp instance [-t computationalTime] [-sol solutionPath]  [-s seed]");
 
 	// Number of clock ticks allowed for the program
 	nb_ticks_allowed = c.get_cpu_time() * CLOCKS_PER_SEC;
 
 	// initialisation of the Parameters
-	mesParametres = new Params(c.get_path_to_instance(), c.get_path_to_solution(), c.get_path_to_BKS(), c.get_seed(), c.get_type(), c.get_nbVeh(), c.get_nbDep(), false);
+	mesParametres = new Params(c.get_path_to_instance(), c.get_path_to_solution(), c.get_path_to_BKS(), c.get_seed());
 
 	// Running the algorithm
 	mesParametres->startTime = clock();
