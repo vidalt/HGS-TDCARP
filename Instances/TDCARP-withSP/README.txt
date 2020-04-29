@@ -1,0 +1,1 @@
+The EGL instances are kept in 7z compressed folders.

@@ -1,0 +1,14 @@
+NAME : Instance name
+VERTICES : Number of vehicle
+EDG_REQ : Number of required edges
+CAPACITY : Vehicle Capacity
+DEPOT : Depot number
+STARTTIME : Start time
+ENDTIME : End time
+[REQUIRED_EDGES] //list all required edge with its distance and demand
+source-node-id destination-node-id demand number-of-pieces <end-piece-i-t end-piece-i-at slope>
+[NETWORK_DATA] //time-dependent shortest path of node pairs in form of piecewise function
+source-node-id destination-node-id number-of-pieces <end-piece-i-t end-piece-i-at slope>
+// (end_piece_i_t, end_piece_i_at) is the end point of piece_i, its meaning is
+// if departure from source-node-id at time end-piece-i-t
+// will arrive at destination-node-id at time end-piece-i-at
