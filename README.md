@@ -2,12 +2,28 @@
 # Purpose
 
 This is the source code of the hybrid genetic search (HGS) for the TDCARP, described in 
-"Vidal, T., Martinelli, R., Pham, T. A., & Hà, M. H. (2020). Arc routing with time-dependent travel times and paths"
+"Vidal, T., Martinelli, R., Pham, T. A., & Hï¿½, M. H. (2020). Arc routing with time-dependent travel times and paths"
 
-For convenience, the calculation of the quickest path is done in a separate code. The metaheuristic reads the result of the quickest path calculation as a TDSP file, and finds near-optimal itineraries to service the requests.
+For convenience, the calculation of the quickest path is done in a separate code (in `Program-SP` folder). The metaheuristic (in `Program` folder) reads the result of the quickest path calculation as a TDSP file, and finds near-optimal itineraries to service the requests.
 This implementation is an extension of the HGS for capacitated arc routing problems available at "https://github.com/vidalt/HGS-CARP".
 
-# Running
+# Running Quickest path calculator
+* Build
+```
+cd Program-SP
+make
+```
+* Running:
+```
+./TDSPGenerator path_to_tdcarp_file
+```
+* Example:
+```
+./TDSPGenerator ../Instances/TDCARP-withoutSP/Type_H/C01.dat 
+```
+This command creates a new tdsp file `./C01.tdsp`
+
+# Running Metaheuristic
 
 ```
 Usage:
